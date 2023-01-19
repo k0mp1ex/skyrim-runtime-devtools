@@ -1,3 +1,5 @@
 set(headers ${headers}
-        src/Logging.hpp
+        include/Events.hpp
+        include/Hooks.hpp
+        include/Logging.hpp
 )

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.24)
 
 project(SkyrimRuntimeDevTools VERSION 0.0.1 LANGUAGES CXX)
 
+include_directories(include)
+
 include(cmake/header-list.cmake)
 include(cmake/source-list.cmake)
 
@@ -19,7 +21,7 @@ set(OUTPUT_FOLDER ${CMAKE_SOURCE_DIR})
 find_package(CommonLibSSE CONFIG REQUIRED)
 add_commonlibsse_plugin(${PROJECT_NAME} SOURCES ${headers} ${sources})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
-target_precompile_headers(${PROJECT_NAME} PRIVATE src/PCH.h)
+target_precompile_headers(${PROJECT_NAME} PRIVATE include/PCH.hpp)
 
 if(DEFINED OUTPUT_FOLDER)
     set(DLL_FOLDER "${OUTPUT_FOLDER}/SKSE/Plugins")

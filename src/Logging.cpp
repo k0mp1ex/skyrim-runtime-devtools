@@ -22,5 +22,6 @@ namespace SRDT::Logging {
         spdlog::set_default_logger(std::move(loggerPtr));
         spdlog::set_level(spdlog::level::trace);
         spdlog::flush_on(spdlog::level::trace);
+        logger::trace("Logging setup completed.");
     }
 }

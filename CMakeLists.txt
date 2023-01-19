@@ -18,10 +18,12 @@ endif()
 # Change the output folder to be this plugin workdir. This way we can symlink and avoid .dll/.pdb copying
 set(OUTPUT_FOLDER ${CMAKE_SOURCE_DIR})
 
+find_package(imgui CONFIG REQUIRED)
 find_package(CommonLibSSE CONFIG REQUIRED)
 add_commonlibsse_plugin(${PROJECT_NAME} SOURCES ${headers} ${sources})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 target_precompile_headers(${PROJECT_NAME} PRIVATE include/PCH.hpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 
 if(DEFINED OUTPUT_FOLDER)
     set(DLL_FOLDER "${OUTPUT_FOLDER}/SKSE/Plugins")

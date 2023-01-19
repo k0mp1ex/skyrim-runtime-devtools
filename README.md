@@ -1,4 +1,4 @@
-# Skyrim Runtime Developer Tools
+# Skyrim Runtime Developer Tools (SRDT)
 
 - [Skyrim Runtime Developer Tools](#skyrim-runtime-developer-tools)
   - [What does it do?](#what-does-it-do)

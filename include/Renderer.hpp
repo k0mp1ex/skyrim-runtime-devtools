@@ -6,8 +6,6 @@
 
 #include "D3D.hpp"
 #include "Module.hpp"
-#include "modules/HelloWorld.hpp"
-#include "modules/Logger.hpp"
 
 namespace SRDT::D3D {
     class Renderer {

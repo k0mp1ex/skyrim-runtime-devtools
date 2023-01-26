@@ -3,10 +3,10 @@
 #include "Module.hpp"
 
 namespace SRDT::Modules {
-    class HelloWorld : public Module {
+    class Scripts : public Module {
     public:
-        HelloWorld() = default;
-        ~HelloWorld() override = default;
+        Scripts() = default;
+        ~Scripts() override = default;
         void Draw() override;
     };
 }

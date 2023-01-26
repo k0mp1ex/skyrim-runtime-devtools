@@ -4,6 +4,7 @@ set(headers ${headers}
         include/Logging.hpp
         include/Module.hpp
         include/Renderer.hpp
-        include/modules/HelloWorld.hpp
+        include/modules/GlobalVariables.hpp
+        include/modules/Scripts.hpp
         include/modules/Logger.hpp
 )

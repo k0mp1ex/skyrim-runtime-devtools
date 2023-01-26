@@ -4,20 +4,21 @@
 namespace SRDT::Hooks {
     REL::Relocation<decltype(D3DInit)> originalD3DInit;
     REL::Relocation<decltype(DXGIPresent)> originalDXGIPresent;
-    bool dx11_initialized = false;
+    bool successfullyInitialized = false;
 
     void D3DInit() {
         logger::trace("void D3DInit(int) called");
         originalD3DInit();
-        Renderer::Initialize();
-        dx11_initialized = true;
+        auto& renderer = SRDT::D3D::Renderer::GetSingleton();
+        successfullyInitialized = renderer.Initialize();
     }
 
     void DXGIPresent(std::uint32_t arg) {
-//        logger::trace("void DXGIPresent(int) called");
+        logger::trace("void DXGIPresent(int) called");
         originalDXGIPresent(arg);
-        if (!dx11_initialized) return;
-        Renderer::Draw();
+        if (!successfullyInitialized) return;
+        auto& renderer = SRDT::D3D::Renderer::GetSingleton();
+        renderer.Render();
     }
 
     void HookD3DInit() {

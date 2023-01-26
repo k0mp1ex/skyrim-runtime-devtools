@@ -4,18 +4,16 @@
 
 #include "Events.hpp"
 
+#define IM_VK_KEYPAD_ENTER (VK_RETURN + 256)
+
 namespace SRDT::Events {
-    class CharEvent : public RE::InputEvent
-    {
+    class CharEvent : public RE::InputEvent {
     public:
         uint32_t keyCode; // 18 (ascii code)
     };
 
-#define IM_VK_KEYPAD_ENTER (VK_RETURN + 256)
-    static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
-    {
-        switch (wParam)
-        {
+    static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam) {
+        switch (wParam) {
             case VK_TAB: return ImGuiKey_Tab;
             case VK_LEFT: return ImGuiKey_LeftArrow;
             case VK_RIGHT: return ImGuiKey_RightArrow;
@@ -145,22 +143,18 @@ namespace SRDT::Events {
 
             auto& io = ImGui::GetIO();
 
-            for (auto event = *a_event; event; event = event->next)
-            {
-                if (event->eventType == RE::INPUT_EVENT_TYPE::kChar)
-                {
+            for (auto event = *a_event; event; event = event->next) {
+                if (event->eventType == RE::INPUT_EVENT_TYPE::kChar) {
                     io.AddInputCharacter(static_cast<CharEvent*>(event)->keyCode);
                 }
-                else if (event->eventType == RE::INPUT_EVENT_TYPE::kButton)
-                {
+                else if (event->eventType == RE::INPUT_EVENT_TYPE::kButton) {
                     const auto button = static_cast<RE::ButtonEvent*>(event);
                     if (!button || (button->IsPressed() && !button->IsDown()))
                         continue;
 
                     auto     scan_code = button->GetIDCode();
                     uint32_t key       = MapVirtualKeyEx(scan_code, MAPVK_VSC_TO_VK_EX, GetKeyboardLayout(0));
-                    switch (scan_code)
-                    {
+                    switch (scan_code) {
                         case DIK_LEFTARROW: key = VK_LEFT; break;
                         case DIK_RIGHTARROW: key = VK_RIGHT; break;
                         case DIK_UPARROW: key = VK_UP; break;
@@ -191,17 +185,15 @@ namespace SRDT::Events {
                         default: break;
                     }
 
-                    switch (button->device.get())
-                    {
+                    switch (button->device.get()) {
                         case RE::INPUT_DEVICE::kMouse:
                             if (scan_code > 7) // middle scroll
                                 io.AddMouseWheelEvent(0, button->Value() * (scan_code == 8 ? 1 : -1));
-                            else
-                            {
+                            else {
                                 if (scan_code > 5) scan_code = 5;
                                 io.AddMouseButtonEvent(scan_code, button->IsPressed());
                             }
-                            break;
+                            return RE::BSEventNotifyControl::kStop;
                         case RE::INPUT_DEVICE::kKeyboard:
                             io.AddKeyEvent(ImGui_ImplWin32_VirtualKeyToImGuiKey(key), button->IsPressed());
                             break;
@@ -224,4 +216,5 @@ namespace SRDT::Events {
         RE::BSInputDeviceManager::GetSingleton()->AddEventSink<RE::InputEvent*>(&eventProcessor);
         logger::trace("Events setup completed.");
     }
+
 }

@@ -1,41 +1,62 @@
-#include <d3d11.h>
-#include <imgui.h>
-#include <imgui_impl_win32.h>
-#include <imgui_impl_dx11.h>
-
 #include "Renderer.hpp"
 
-namespace SRDT::Renderer {
-    ID3D11Device* device;
-    ID3D11DeviceContext* deviceContext;
-    IDXGISwapChain* swapChain;
+namespace SRDT::D3D {
+    bool Renderer::Initialize() {
+        return InitializeD3D() && InitializeImGui();
+    }
 
-    void Initialize() {
+    void Renderer::RegisterModule(std::unique_ptr<Module> module) {
+        _modules.push_back(std::move(module));
+    }
+
+    void Renderer::Render() const {
+        StartRender();
+        Draw();
+        EndRender();
+    }
+
+    void Renderer::EnableVsync() {
+        _enableVsync = true;
+    }
+
+    void Renderer::DisableVsync() {
+        _enableVsync = false;
+    }
+
+    [[nodiscard]] const D3DData& Renderer::GetData() const {
+        return _data;
+    }
+
+    [[nodiscard]] bool Renderer::InitializeD3D() {
         auto render_manager = RE::BSRenderManager::GetSingleton();
         if (!render_manager) {
             logger::error("Cannot find render manager. Initialization failed!");
-            return;
+            return false;
         }
 
         auto render_data = render_manager->GetRuntimeData();
 
         logger::trace("Getting swapchain...");
-        swapChain = render_data.swapChain;
-        if (!swapChain) {
+        _data.swapChain = render_data.swapChain;
+        if (!_data.swapChain) {
             logger::error("Cannot find swapchain. Initialization failed!");
-            return;
+            return false;
         }
 
         logger::trace("Getting swapchain desc...");
-        DXGI_SWAP_CHAIN_DESC sd{};
-        if (swapChain->GetDesc(std::addressof(sd)) < 0) {
+        if (_data.swapChain->GetDesc(std::addressof(_data.swapChainDesc)) < 0) {
             logger::error("IDXGISwapChain::GetDesc failed.");
-            return;
+            return false;
         }
 
-        device = render_data.forwarder;
-        deviceContext = render_data.context;
+        _data.device = render_data.forwarder;
+        _data.deviceContext = render_data.context;
+        _data.renderTargetView = render_data.renderView;
 
+        return true;
+    }
+
+    [[nodiscard]] bool Renderer::InitializeImGui() const {
         logger::trace("Initializing ImGui...");
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -59,55 +80,58 @@ namespace SRDT::Renderer {
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
-        if (!ImGui_ImplWin32_Init(sd.OutputWindow)) {
+        if (!ImGui_ImplWin32_Init(_data.swapChainDesc.OutputWindow)) {
             logger::error("ImGui initialization failed (Win32)");
-            return;
+            return false;
         }
-        if (!ImGui_ImplDX11_Init(device, deviceContext)) {
+        if (!ImGui_ImplDX11_Init(_data.device, _data.deviceContext)) {
             logger::error("ImGui initialization failed (DX11)");
-            return;
+            return false;
+        }
+
+        WndProcHook::func = reinterpret_cast<WNDPROC>(
+            SetWindowLongPtrA(
+                _data.swapChainDesc.OutputWindow,
+                GWLP_WNDPROC,
+                reinterpret_cast<LONG_PTR>(WndProcHook::thunk)));
+        if (!WndProcHook::func) {
+            logger::error("SetWindowLongPtrA failed!");
+            return false;
         }
 
         logger::trace("ImGui initialized!");
+        return true;
     }
 
-    void DrawLogger() {
-        static float f = 0.0f;
-        static int local_counter = 0;
-
-        ImGui::Begin("Logger Visualizer");
-
-        ImGui::Text("This is some useful text.");
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-        if (ImGui::Button("Button")) local_counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", local_counter);
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::End();
-    }
-
-    void Draw() {
-        // Start the Dear ImGui frame
+    void Renderer::StartRender() const {
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+    }
 
-        // Draw inside the frame
-        DrawLogger();
-
-        // Rendering
+    void Renderer::EndRender() const {
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         auto& io = ImGui::GetIO();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
-
-        //Vsync on
-        swapChain->Present(1, 0);
-//        logger::trace("ImGui demo has been drawn!");
+        _data.swapChain->Present(_enableVsync, 0);
     }
+
+    void Renderer::Draw() const {
+        std::ranges::for_each(_modules, [](const std::unique_ptr<Module>& module) {
+            if (module->CanDraw()) {
+                module->Draw();
+            }
+        });
+    }
+
+    void Setup() {
+        auto& renderer = SRDT::D3D::Renderer::GetSingleton();
+        renderer.RegisterModule(std::make_unique<SRDT::Modules::HelloWorld>());
+        renderer.RegisterModule(std::make_unique<SRDT::Modules::Logger>());
+    }
+
 }

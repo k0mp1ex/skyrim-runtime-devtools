@@ -1,24 +1,30 @@
 #include "Hooks.hpp"
 #include "Renderer.hpp"
+#include "modules/Scripts.hpp"
 
 namespace SRDT::Hooks {
     REL::Relocation<decltype(D3DInit)> originalD3DInit;
     REL::Relocation<decltype(DXGIPresent)> originalDXGIPresent;
+    REL::Relocation<decltype(ScriptGetsProcessed)> originalScriptGetsProcessed;
     bool successfullyInitialized = false;
 
     void D3DInit() {
-        logger::trace("void D3DInit(int) called");
         originalD3DInit();
         auto& renderer = SRDT::D3D::Renderer::GetSingleton();
         successfullyInitialized = renderer.Initialize();
     }
 
     void DXGIPresent(std::uint32_t arg) {
-        logger::trace("void DXGIPresent(int) called");
         originalDXGIPresent(arg);
         if (!successfullyInitialized) return;
         auto& renderer = SRDT::D3D::Renderer::GetSingleton();
         renderer.Render();
+    }
+
+    bool ScriptGetsProcessed(RE::BSScript::LinkerProcessor* self, const RE::BSFixedString& className) {
+        bool result = originalScriptGetsProcessed(self, className);
+        SRDT::Modules::Scripts::AddScript(className.c_str());
+        return result;
     }
 
     void HookD3DInit() {
@@ -35,11 +41,18 @@ namespace SRDT::Hooks {
         logger::trace("DXGIPresent hook written.");
     }
 
+    void HookScriptGetsProcessed() {
+        REL::Relocation<std::uintptr_t> vtbl { RE::VTABLE_BSScript__LinkerProcessor[0] };
+        originalScriptGetsProcessed = vtbl.write_vfunc(3, ScriptGetsProcessed);
+        logger::info("ScriptGetsProcessed hook written.");
+    }
+
     void Setup() {
         logger::trace("Allocating trampoline and initializing hooks...");
         SKSE::AllocTrampoline(14 * 2);
         HookD3DInit();
         HookDXGIPresent();
+        HookScriptGetsProcessed();
         logger::trace("Hooks setup completed.");
     }
 }

@@ -1,10 +1,6 @@
 #include "Renderer.hpp"
 
-#include "modules/GlobalVariables.hpp"
-#include "modules/Logger.hpp"
-#include "modules/Scripts.hpp"
-
-namespace SRDT::D3D {
+namespace SRDT {
     bool Renderer::Initialize() {
         return InitializeD3D() && InitializeImGui();
     }
@@ -134,13 +130,6 @@ namespace SRDT::D3D {
                 module->Draw();
             }
         });
-    }
-
-    void Setup() {
-        auto& renderer = SRDT::D3D::Renderer::GetSingleton();
-        renderer.RegisterModule(std::make_unique<SRDT::Modules::GlobalVariables>());
-        renderer.RegisterModule(std::make_unique<SRDT::Modules::Scripts>());
-        renderer.RegisterModule(std::make_unique<SRDT::Modules::Logger>());
     }
 
 }

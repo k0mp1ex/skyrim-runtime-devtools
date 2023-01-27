@@ -6,7 +6,7 @@ namespace SRDT::Modules {
 
     void Scripts::Draw() {
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Scripts Visualizer!");
+        ImGui::Begin("Scripts");
 
         ImGui::Text("%zu scripts loaded.", scripts.size());
         ImGui::Spacing();

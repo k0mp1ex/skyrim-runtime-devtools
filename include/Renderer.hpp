@@ -7,7 +7,7 @@
 #include "D3D.hpp"
 #include "Module.hpp"
 
-namespace SRDT::D3D {
+namespace SRDT {
     class Renderer {
         Renderer() = default;
         ~Renderer() = default;
@@ -39,6 +39,4 @@ namespace SRDT::D3D {
         std::vector<std::unique_ptr<Module>> _modules;
         bool _enableVsync {};
     };
-
-    void Setup();
 }

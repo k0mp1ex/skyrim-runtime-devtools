@@ -10,14 +10,14 @@ namespace SRDT::Hooks {
 
     void D3DInit() {
         originalD3DInit();
-        auto& renderer = SRDT::D3D::Renderer::GetSingleton();
+        auto& renderer = SRDT::Renderer::GetSingleton();
         successfullyInitialized = renderer.Initialize();
     }
 
     void DXGIPresent(std::uint32_t arg) {
         originalDXGIPresent(arg);
         if (!successfullyInitialized) return;
-        auto& renderer = SRDT::D3D::Renderer::GetSingleton();
+        auto& renderer = SRDT::Renderer::GetSingleton();
         renderer.Render();
     }
 

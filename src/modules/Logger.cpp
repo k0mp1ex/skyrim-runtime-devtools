@@ -4,16 +4,14 @@
 
 namespace SRDT::Modules {
     void Logger::Draw() {
-        static float f = 0.0f;
-        static int local_counter = 0;
+        UpdateData();
 
-        ImGui::Begin("Logger Visualizer");
+        ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Logs Visualizer");
 
-        ImGui::Text("This is some useful text.");
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-        if (ImGui::Button("Button")) local_counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", local_counter);
+        for (const auto& log: logs) {
+            ImGui::Text("Filename: %s", log.fileName.c_str());
+        }
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();

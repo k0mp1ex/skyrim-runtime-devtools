@@ -66,6 +66,10 @@ namespace SRDT::D3D {
         ImGui::CreateContext();
 
         auto& io = ImGui::GetIO(); (void)io;
+
+        std::string iniFileName = std::format("Data\\SKSE\\Plugins\\{}_ImGui.ini", SKSE::PluginDeclaration::GetSingleton()->GetName());
+        io.IniFilename = iniFileName.c_str();
+
         io.MouseDrawCursor = true;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls

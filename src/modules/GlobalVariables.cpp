@@ -3,31 +3,12 @@
 #include "modules/GlobalVariables.hpp"
 
 namespace SRDT::Modules {
-    struct GlobalVariableData {
-        std::string editorID;
-        float value;
-    };
-
-    static std::vector<GlobalVariableData> FetchGlobalVariables() {
-        std::vector<GlobalVariableData> data;
-
-        const auto& [forms, lock] = RE::TESForm::GetAllForms();
-        const RE::BSReadLockGuard locker{ lock };
-
-        for (auto& [id, form] : *forms) {
-            auto* globalVariable = form->As<RE::TESGlobal>();
-            if (globalVariable)
-                data.emplace_back(GlobalVariableData{ globalVariable->GetFormEditorID(), globalVariable->value });
-        }
-
-        return data;
-    }
 
     void GlobalVariables::Draw() {
-        ImGui::Begin("Global Variables");
+        UpdateData();
 
-        //TODO: Check when the data can be updated!
-        static auto globalVariables = FetchGlobalVariables();
+        ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Global Variables");
 
         static ImGuiTableFlags tableFlags =
             ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable

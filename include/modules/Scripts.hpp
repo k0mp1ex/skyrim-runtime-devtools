@@ -15,6 +15,7 @@ namespace SRDT::Modules {
         Scripts() = default;
         ~Scripts() override = default;
         void Draw() override;
+
         static void AddScript(const RE::BSFixedString& scriptName) {
             RE::BSScript::IVirtualMachine* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
             RE::BSTSmartPointer<RE::BSScript::ObjectTypeInfo> typeInfo;

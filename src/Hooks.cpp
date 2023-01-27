@@ -23,7 +23,7 @@ namespace SRDT::Hooks {
 
     bool ScriptGetsProcessed(RE::BSScript::LinkerProcessor* self, const RE::BSFixedString& className) {
         bool result = originalScriptGetsProcessed(self, className);
-        SRDT::Modules::Scripts::AddScript(className.c_str());
+        SRDT::Modules::Scripts::AddScript(className);
         return result;
     }
 

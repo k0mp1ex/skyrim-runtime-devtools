@@ -1,10 +1,11 @@
-#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <imgui.h>
 
 #include "Events.hpp"
 
 #define IM_VK_KEYPAD_ENTER (VK_RETURN + 256)
+
+//Event code from https://github.com/Pentalimbed/cathub
 
 namespace SRDT::Events {
     class CharEvent : public RE::InputEvent {

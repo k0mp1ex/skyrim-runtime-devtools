@@ -35,10 +35,10 @@ namespace SRDT::Modules {
             | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
             | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
             | ImGuiTableFlags_SizingFixedFit;
-        static ImGuiSliderFlags floatFlags = ImGuiSliderFlags_NoInput; //cannot edit the value
+        static ImGuiSliderFlags floatFlags = ImGuiSliderFlags_None;
 
         const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
-        const ImVec2 outer_size_value = ImVec2(0.0f, TEXT_BASE_HEIGHT * 12); //show only first 12 lines
+        const ImVec2 outer_size_value = ImVec2(0.0f, TEXT_BASE_HEIGHT * 12);
         const bool outer_size_enabled = true;
         const float inner_width_with_scroll = 0.0f;
         const float inner_width_to_use = (tableFlags & ImGuiTableFlags_ScrollX) ? inner_width_with_scroll : 0.0f;
@@ -57,7 +57,7 @@ namespace SRDT::Modules {
                 if (ImGui::TableSetColumnIndex(0))
                     ImGui::TextUnformatted(globalVariable.editorID.c_str());
                 if (ImGui::TableSetColumnIndex(1))
-                    ImGui::DragFloat("", &globalVariable.value, 0.05f, -FLT_MAX, +FLT_MAX, "%.2f", floatFlags);
+                    ImGui::DragFloat("", &globalVariable.value, 0.05f, -FLT_MAX, +FLT_MAX, "%.2f", floatFlags); //TODO: Why all data is being updated instead of just the current value?
             }
 
             ImGui::EndTable();
